@@ -3,14 +3,35 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\cryptocurrencies\binance-usd.csv">
+        <entry key="\cryptocurrencies_data\binance-usd.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\cryptocurrencies\bitcoin-cash.csv">
+        <entry key="\cryptocurrencies_data\bitcoin-cash.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\bitcoin.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\litecoin.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\shiba-inu.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
