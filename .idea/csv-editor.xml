@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\cryptocurrencies_data\binancecoin.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\cryptocurrencies_data\bitcoin-cash.csv">
           <value>
             <Attribute>
@@ -24,6 +31,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\cryptocurrencies_data\dogecoin.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\ethereum-classic.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\ethereum.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\cryptocurrencies_data\litecoin.csv">
           <value>
             <Attribute>
@@ -32,6 +60,27 @@
           </value>
         </entry>
         <entry key="\cryptocurrencies_data\shiba-inu.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\terra-luna.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\tether.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\cryptocurrencies_data\usd-coin.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

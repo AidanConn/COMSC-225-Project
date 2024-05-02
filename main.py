@@ -34,8 +34,6 @@ print("3. Exit")
 # Ask the user to choose an option
 option = input("Enter the number of the option you want to choose: ")
 
-
-
 if option == "1":
     # Ask the user to choose a cryptocurrency
     cryptocurrency = input("Enter the name of the cryptocurrency you want to analyze: ")
@@ -180,30 +178,132 @@ if option == "1":
         ax2.plot(df_monthly["google_trends"], color=color)
         ax2.tick_params(axis='y', labelcolor=color)
 
-        #fig.tight_layout()
+        # fig.tight_layout()
         plt.title(f"{cryptocurrency} Monthly Price vs Google Trends")
         plt.show()
 
         # Calculate the correlation between the price and the google trends data
         correlation, p_value = pearsonr(df_monthly["price"], df_monthly["google_trends"])
-        print(f"Correlation: {correlation}") # This number should be between -1 and 1 (0 means no correlation) (Closer to 1 means positive correlation, closer to -1 means negative correlation)
+        print(f"Correlation: {correlation}")  # This number should be between -1 and 1 (0 means no correlation) (Closer to 1 means positive correlation, closer to -1 means negative correlation)
         print(f"P-value: {p_value}")
 
+        # Price prediction based on Google Trends data
+        # Split the data into training and testing data
+        train_size = int(len(df_monthly) * 0.7)
+        train = df_monthly[:train_size]
+        test = df_monthly[train_size:]
+
+        # Linear regression model
+        from sklearn.linear_model import LinearRegression
+        from sklearn.metrics import mean_squared_error
+        from math import sqrt
+
+        # Create the linear regression model
+        model = LinearRegression()
+
+        # Train the model
+        model.fit(train[["google_trends"]], train["price"])
+
+        # Make predictions
+        predictions = model.predict(test[["google_trends"]])
+
+        # Calculate the root mean squared error
+        rmse = sqrt(mean_squared_error(test["price"], predictions))
+        print(f"Root Mean Squared Error: {rmse}")
+
+        # Visualize the predictions with the actual price and the google trends data | Use ax to plot on the same figure
+        fig, ax1 = plt.subplots(figsize=(12, 6))
+        color = 'tab:red'
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Price', color=color)
+        ax1.plot(df_monthly["price"], color=color)
+        ax1.plot(test.index, predictions, color="green", linestyle="--")
+        ax1.tick_params(axis='y', labelcolor=color)
+
+        ax2 = ax1.twinx()
+        color = 'tab:blue'
+        ax2.set_ylabel('Google Trends', color=color)
+        ax2.plot(df_monthly["google_trends"], color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        plt.title(f"{cryptocurrency} Monthly Price vs Google Trends")
+        plt.show()
+
+        # Line separation
+        print("--------------------------------------------------------")
+
+        # Print the predictions
+        print(predictions)
+
+        # Line separation
+        print("--------------------------------------------------------")
+
+        # regression algorithms to predict the price of the cryptocurrency based on the Google Trends data
+
+        # Import the necessary libraries
+        from sklearn.linear_model import LinearRegression
+        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.svm import SVR
+        from sklearn.model_selection import train_test_split
+        from sklearn.metrics import mean_squared_error
+        from math import sqrt
+
+        # Split the data into training and testing data
+        train_size = int(len(df_monthly) * 0.7)
+        train = df_monthly[:train_size]
+        test = df_monthly[train_size:]
+
+        # Create the linear regression model
+        model = LinearRegression()
+
+        # Train the model
+        model.fit(train[["google_trends"]], train["price"])
+
+        # Make predictions
+        predictions = model.predict(test[["google_trends"]])
+
+        # Calculate the root mean squared error
+        rmse = sqrt(mean_squared_error(test["price"], predictions))
+        print(f"Root Mean Squared Error: {rmse}")
+
+        # Save predictions into new variable for later use
+        linear_regression_rmse = predictions
+
+        # Create the random forest regression model
+        model = RandomForestRegressor()
+
+        # Train the model
+        model.fit(train[["google_trends"]], train["price"])
+
+        # Make predictions
+        predictions = model.predict(test[["google_trends"]])
+
+        # Calculate the root mean squared error
+        rmse = sqrt(mean_squared_error(test["price"], predictions))
+        print(f"Root Mean Squared Error: {rmse}")
+
+        # Save predictions into new variable for later use
+        random_forest_rmse = predictions
+
+        # Create the support vector regression model
+        model = SVR()
+
+        # Train the model
+        model.fit(train[["google_trends"]], train["price"])
+
+        # Make predictions
+        predictions = model.predict(test[["google_trends"]])
+
+        # Calculate the root mean squared error
+        rmse = sqrt(mean_squared_error(test["price"], predictions))
+        print(f"Root Mean Squared Error: {rmse}")
+
+        # Save predictions into new variable for later use
+        svr_rmse = predictions
+
+        # q: Why is the prediction value so much lower than the actual price?
+        # a: The price is the actual price of the cryptocurrency, while the prediction is the predicted price of the cryptocurrency based on the Google Trends data.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    else:
-        print("Cryptocurrency not found. Please enter a valid cryptocurrency.")
+else:
+    print("Cryptocurrency not found. Please enter a valid cryptocurrency.")
