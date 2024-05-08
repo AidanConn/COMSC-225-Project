@@ -13,6 +13,7 @@ import seaborn as sns
 from scipy.stats import pearsonr  # If you need to calculate correlation coefficients
 from pytrends.request import TrendReq  # If you want to access Google Trends data
 from datetime import datetime
+from math import sqrt
 
 # ** Step 1: Load the data* *
 # Find all cryptocurrencies_data in the folder "cryptocurrencies_data" and store them in a list
@@ -113,7 +114,26 @@ if option == "1":
         start_date = df["date"].min()
         end_date = df["date"].max()
         pytrends.build_payload(kw_list, cat=0, timeframe=f"{start_date} {end_date}", geo="", gprop="")
-        interest_over_time = pytrends.interest_over_time()
+
+        # Get public ip address of this machine
+        import requests
+        ip = requests.get('https://api64.ipify.org').text
+        print(ip)
+
+        try:
+            interest_over_time = pytrends.interest_over_time()
+            # Save the Google Trends data to a CSV file in the folder "google_trends_data"
+            interest_over_time.to_csv(f"google_trends_data/{cryptocurrency}_google_trends.csv")
+        except:
+            # If there is an error, use previously saved data if available
+            try:
+                print("Error getting Google Trends data. Using previously saved data...")
+                interest_over_time = pd.read_csv(f"google_trends_data/{cryptocurrency}_google_trends.csv")
+            except:
+                print("Error getting Google Trends data. Please try again later.")
+                exit()
+
+
         print(interest_over_time)
 
         # Make a line plot of the Google Trends data
@@ -201,9 +221,9 @@ if option == "1":
         import pandas as pd
         from sklearn.model_selection import train_test_split
         from sklearn.linear_model import LinearRegression
-        from sklearn.metrics import mean_absolute_error, mean_squared_error
+        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-        X = df_monthly[["google_trends", "price"]]
+        X = df_monthly[["google_trends"]]
         y = df_monthly["price"]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
@@ -221,6 +241,11 @@ if option == "1":
         mse = mean_squared_error(y_test, predictions)
         print("Mean Absolute Error:", mae)
         print("Mean Squared Error:", mse)
+        rmse = sqrt(mean_squared_error(y_test, predictions))
+        print(f"Root Mean Squared Error: {rmse}")
+        r2 = r2_score(y_test, predictions)
+        print(f"R^2 Score: {r2}")
+
 
         # Create a DataFrame from X_test and predictions
         df_predictions = pd.DataFrame(predictions, index=X_test.index, columns=['Predictions'])
