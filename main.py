@@ -67,7 +67,7 @@ if option == "1":
         # Print the first 5 rows of the data
         print(df.head())
 
-        # Make a line plot for a green line for the positive changes and a red line for the negative changes, do not include the dates because it is too crowded
+        # Plot to show the daily change in price
         plt.figure(figsize=(12, 6))
         plt.plot(df["Daily Change Value"], color="green", label="Positive Change")
         plt.plot(df["Daily Change Value"].mask(df["Daily Change Value"] > 0), color="red", label="Negative Change")
@@ -77,7 +77,7 @@ if option == "1":
         plt.legend()
         plt.show()
 
-        # Make a line plot for the daily percentage change in price
+        # Plot to show the daily percentage change in price
         plt.figure(figsize=(12, 6))
         plt.plot(df["Price Change %"])
         plt.title(f"{cryptocurrency} Daily Percentage Change in Price")
@@ -85,7 +85,7 @@ if option == "1":
         plt.ylabel("Price Change %")
         plt.show()
 
-        # Make a histogram for the daily percentage change in price
+        # Histogram to show the daily percentage change in price
         plt.figure(figsize=(12, 6))
         sns.histplot(df["Price Change %"].dropna(), kde=True)
         plt.title(f"{cryptocurrency} Daily Percentage Change in Price")
@@ -93,7 +93,7 @@ if option == "1":
         plt.ylabel("Frequency")
         plt.show()
 
-        # Make a scatter plot of the price vs the total_volume
+        # Scatter plot to show the price vs the total_volume
         plt.figure(figsize=(12, 6))
         plt.scatter(df["price"], df["total_volume"], color="blue")
         plt.title(f"{cryptocurrency} Price vs Total Volume")
@@ -101,21 +101,19 @@ if option == "1":
         plt.ylabel("Total Volume")
         plt.show()
 
-        # # Now get the Google Trends data how far the data goes back (Test with basic example)
-        # pytrends = TrendReq(hl="en-US", tz=360)
-        # kw_list = [cryptocurrency]
-        # pytrends.build_payload(kw_list, cat=0, timeframe="all", geo="", gprop="")
-        # interest_over_time = pytrends.interest_over_time()
-        # print(interest_over_time)
 
         # Do it again but this limit the data to last dates of the cryptocurrency data (Date format in data is "2015-01-04")
         pytrends = TrendReq(hl="en-US", tz=360)
-        kw_list = [cryptocurrency]
+
+        cryptocurrency_formatted = cryptocurrency.replace("-", " ") # Replace "-" with " " for Google Trends
+        kw_list = [cryptocurrency_formatted]
+
+
         start_date = df["date"].min()
         end_date = df["date"].max()
         pytrends.build_payload(kw_list, cat=0, timeframe=f"{start_date} {end_date}", geo="", gprop="")
 
-        # Get public ip address of this machine
+        # Get public ip address of this machine (debugging purposes) | Need because of 429 error
         import requests
         ip = requests.get('https://api64.ipify.org').text
         print(ip)
@@ -124,12 +122,14 @@ if option == "1":
             interest_over_time = pytrends.interest_over_time()
             # Save the Google Trends data to a CSV file in the folder "google_trends_data"
             interest_over_time.to_csv(f"google_trends_data/{cryptocurrency}_google_trends.csv")
-        except:
+        except Exception as e:
             # If there is an error, use previously saved data if available
             try:
+                print(e)
+                print("-----------------------------------")
                 print("Error getting Google Trends data. Using previously saved data...")
                 interest_over_time = pd.read_csv(f"google_trends_data/{cryptocurrency}_google_trends.csv")
-            except:
+            except FileNotFoundError:
                 print("Error getting Google Trends data. Please try again later.")
                 exit()
 
@@ -138,7 +138,7 @@ if option == "1":
 
         # Make a line plot of the Google Trends data
         plt.figure(figsize=(12, 6))
-        plt.plot(interest_over_time[cryptocurrency], color="purple")
+        plt.plot(interest_over_time[cryptocurrency_formatted], color="purple")
         plt.title(f"{cryptocurrency} Google Trends Data")
         plt.xlabel("Date")
         plt.ylabel("Interest")
@@ -207,7 +207,6 @@ if option == "1":
         print(f"Correlation: {correlation}")  # This number should be between -1 and 1 (0 means no correlation) (Closer to 1 means positive correlation, closer to -1 means negative correlation)
         print(f"P-value: {p_value}")
 
-        # Price prediction based on Google Trends data
         # Split the data into training and testing data
         train_size = int(len(df_monthly) * 0.7)
         train = df_monthly[:train_size]
@@ -223,7 +222,7 @@ if option == "1":
         from sklearn.linear_model import LinearRegression
         from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-        X = df_monthly[["google_trends"]]
+        X = df_monthly[["google_trends", "total_volume"]]
         y = df_monthly["price"]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
@@ -233,8 +232,22 @@ if option == "1":
         # Train the model
         model.fit(X_train, y_train)
 
-        # Make predictions
+        # Make predictions with the model (There should be no negative values)
         predictions = model.predict(X_test)
+
+       # q: What are passed into the model prediction to get the predicted price?
+        print("Features passed into the model prediction to get the predicted price:")
+        print(X_test.sort_index())
+
+        # Print the predictions with the date index (sort by date)
+        print("Predictions:")
+        print(pd.DataFrame(predictions, index=X_test.index, columns=['Predictions']).sort_index())
+
+
+
+        # q: What are the actual prices? (sort by date)
+        print("Actual prices:")
+        print(y_test.sort_index())
 
         # Calculate errors
         mae = mean_absolute_error(y_test, predictions)
@@ -245,7 +258,6 @@ if option == "1":
         print(f"Root Mean Squared Error: {rmse}")
         r2 = r2_score(y_test, predictions)
         print(f"R^2 Score: {r2}")
-
 
         # Create a DataFrame from X_test and predictions
         df_predictions = pd.DataFrame(predictions, index=X_test.index, columns=['Predictions'])
@@ -271,46 +283,8 @@ if option == "1":
         plt.title(f"{cryptocurrency} Monthly Price vs Google Trends")
         plt.show()
 
-
-        # Create the linear regression model
-        model = LinearRegression()
-
-        # Train the model
-        model.fit(train[["google_trends"]], train["price"])
-
-        # Make predictions
-        predictions = model.predict(test[["google_trends"]])
-
-        # Calculate the root mean squared error
-        rmse = sqrt(mean_squared_error(test["price"], predictions))
-        print(f"Root Mean Squared Error: {rmse}")
-
-        # Visualize the predictions with the actual price and the google trends data | Use ax to plot on the same figure
-        fig, ax1 = plt.subplots(figsize=(12, 6))
-        color = 'tab:red'
-        ax1.set_xlabel('Date')
-        ax1.set_ylabel('Price', color=color)
-        ax1.plot(df_monthly["price"], color=color)
-        ax1.plot(test.index, predictions, color="green", linestyle="--")
-        ax1.tick_params(axis='y', labelcolor=color)
-
-        ax2 = ax1.twinx()
-        color = 'tab:blue'
-        ax2.set_ylabel('Google Trends', color=color)
-        ax2.plot(df_monthly["google_trends"], color=color)
-        ax2.tick_params(axis='y', labelcolor=color)
-
-        plt.title(f"{cryptocurrency} Monthly Price vs Google Trends")
-        plt.show()
-
-        # Line separation
         print("--------------------------------------------------------")
 
-        # Print the predictions
-        print(predictions)
-
-        # Line separation
-        print("--------------------------------------------------------")
 elif option == "2":
     # Use two cryptocurrencies to compare the relationship between the two and see if it can be predicted
     # if given one price, can we predict the other price? (or near it)
